@@ -1,0 +1,923 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: TripSync API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: trips
+    description: Trip management
+  - name: members
+    description: Trip members
+  - name: itinerary
+    description: Itinerary items
+  - name: expenses
+    description: Expense tracking
+  - name: tasks
+    description: Task management
+  - name: analytics
+    description: Budget and expense analytics
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── TRIPS ───────────────────────────────────────────────────────────────────
+  /trips:
+    get:
+      operationId: listTrips
+      tags: [trips]
+      summary: List all trips
+      responses:
+        "200":
+          description: List of trips
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trip"
+    post:
+      operationId: createTrip
+      tags: [trips]
+      summary: Create a new trip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripInput"
+      responses:
+        "201":
+          description: Created trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trip"
+
+  /trips/{id}:
+    get:
+      operationId: getTrip
+      tags: [trips]
+      summary: Get a trip by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trip details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trip"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateTrip
+      tags: [trips]
+      summary: Update a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripUpdate"
+      responses:
+        "200":
+          description: Updated trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trip"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTrip
+      tags: [trips]
+      summary: Delete a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /trips/{id}/summary:
+    get:
+      operationId: getTripSummary
+      tags: [analytics]
+      summary: Get trip dashboard summary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trip summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripSummary"
+        "404":
+          description: Not found
+
+  /trips/{id}/expense-analytics:
+    get:
+      operationId: getTripExpenseAnalytics
+      tags: [analytics]
+      summary: Get expense analytics for a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Expense analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseAnalytics"
+        "404":
+          description: Not found
+
+  # ─── MEMBERS ─────────────────────────────────────────────────────────────────
+  /trips/{id}/members:
+    get:
+      operationId: listTripMembers
+      tags: [members]
+      summary: List members of a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TripMember"
+    post:
+      operationId: addTripMember
+      tags: [members]
+      summary: Add a member to a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripMemberInput"
+      responses:
+        "201":
+          description: Added member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripMember"
+
+  /trips/{tripId}/members/{memberId}:
+    delete:
+      operationId: removeTripMember
+      tags: [members]
+      summary: Remove a member from a trip
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  # ─── ITINERARY ───────────────────────────────────────────────────────────────
+  /trips/{id}/itinerary:
+    get:
+      operationId: listItineraryItems
+      tags: [itinerary]
+      summary: List itinerary items for a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of itinerary items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ItineraryItem"
+    post:
+      operationId: createItineraryItem
+      tags: [itinerary]
+      summary: Add an itinerary item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItineraryItemInput"
+      responses:
+        "201":
+          description: Created itinerary item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItineraryItem"
+
+  /itinerary/{id}:
+    patch:
+      operationId: updateItineraryItem
+      tags: [itinerary]
+      summary: Update an itinerary item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItineraryItemUpdate"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItineraryItem"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteItineraryItem
+      tags: [itinerary]
+      summary: Delete an itinerary item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── EXPENSES ────────────────────────────────────────────────────────────────
+  /trips/{id}/expenses:
+    get:
+      operationId: listExpenses
+      tags: [expenses]
+      summary: List expenses for a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Expense"
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Add an expense to a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseInput"
+      responses:
+        "201":
+          description: Created expense
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
+  /expenses/{id}:
+    patch:
+      operationId: updateExpense
+      tags: [expenses]
+      summary: Update an expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseUpdate"
+      responses:
+        "200":
+          description: Updated expense
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteExpense
+      tags: [expenses]
+      summary: Delete an expense
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /trips/{id}/balances:
+    get:
+      operationId: getTripBalances
+      tags: [expenses]
+      summary: Get per-person balances for a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Per-person balances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonBalance"
+        "404":
+          description: Not found
+
+  # ─── TASKS ───────────────────────────────────────────────────────────────────
+  /trips/{id}/tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks for a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a task for a trip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    # ── TRIP ──────────────────────────────────────────────────────────────────
+    Trip:
+      type: object
+      required: [id, name, destination, startDate, endDate, budget, currency, status, description, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        destination:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        budget:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [planning, active, completed]
+        description:
+          type: ["string", "null"]
+        coverImage:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TripInput:
+      type: object
+      required: [name, destination, startDate, endDate, budget, currency]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        destination:
+          type: string
+          minLength: 1
+        startDate:
+          type: string
+        endDate:
+          type: string
+        budget:
+          type: number
+        currency:
+          type: string
+        description:
+          type: string
+        coverImage:
+          type: string
+
+    TripUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        destination:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        budget:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [planning, active, completed]
+        description:
+          type: string
+        coverImage:
+          type: string
+
+    # ── TRIP SUMMARY (wow endpoint) ───────────────────────────────────────────
+    TripSummary:
+      type: object
+      required: [tripId, totalBudget, totalSpent, remaining, budgetUsedPct, memberCount, itineraryCount, taskCount, pendingTaskCount, expenseCount]
+      properties:
+        tripId:
+          type: integer
+        totalBudget:
+          type: number
+        totalSpent:
+          type: number
+        remaining:
+          type: number
+        budgetUsedPct:
+          type: number
+        memberCount:
+          type: integer
+        itineraryCount:
+          type: integer
+        taskCount:
+          type: integer
+        pendingTaskCount:
+          type: integer
+        expenseCount:
+          type: integer
+
+    # ── EXPENSE ANALYTICS (wow endpoint) ─────────────────────────────────────
+    ExpenseAnalytics:
+      type: object
+      required: [tripId, totalSpent, byCategory, byPerson]
+      properties:
+        tripId:
+          type: integer
+        totalSpent:
+          type: number
+        byCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryBreakdown"
+        byPerson:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonSpending"
+
+    CategoryBreakdown:
+      type: object
+      required: [category, amount, count]
+      properties:
+        category:
+          type: string
+        amount:
+          type: number
+        count:
+          type: integer
+
+    PersonSpending:
+      type: object
+      required: [name, paid, owes]
+      properties:
+        name:
+          type: string
+        paid:
+          type: number
+        owes:
+          type: number
+
+    PersonBalance:
+      type: object
+      required: [name, paid, owes, balance]
+      properties:
+        name:
+          type: string
+        paid:
+          type: number
+        owes:
+          type: number
+        balance:
+          type: number
+
+    # ── MEMBER ────────────────────────────────────────────────────────────────
+    TripMember:
+      type: object
+      required: [id, tripId, name, email, role, joinedAt]
+      properties:
+        id:
+          type: integer
+        tripId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [owner, admin, member]
+        joinedAt:
+          type: string
+
+    TripMemberInput:
+      type: object
+      required: [name, email, role]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        role:
+          type: string
+          enum: [admin, member]
+
+    # ── ITINERARY ITEM ────────────────────────────────────────────────────────
+    ItineraryItem:
+      type: object
+      required: [id, tripId, day, title, type, startTime, endTime, location, notes, sortOrder, createdAt]
+      properties:
+        id:
+          type: integer
+        tripId:
+          type: integer
+        day:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          enum: [activity, hotel, restaurant, transport, other]
+        startTime:
+          type: ["string", "null"]
+        endTime:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+
+    ItineraryItemInput:
+      type: object
+      required: [day, title, type]
+      properties:
+        day:
+          type: integer
+        title:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [activity, hotel, restaurant, transport, other]
+        startTime:
+          type: string
+        endTime:
+          type: string
+        location:
+          type: string
+        notes:
+          type: string
+        sortOrder:
+          type: integer
+
+    ItineraryItemUpdate:
+      type: object
+      properties:
+        day:
+          type: integer
+        title:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [activity, hotel, restaurant, transport, other]
+        startTime:
+          type: string
+        endTime:
+          type: string
+        location:
+          type: string
+        notes:
+          type: string
+        sortOrder:
+          type: integer
+
+    # ── EXPENSE ───────────────────────────────────────────────────────────────
+    Expense:
+      type: object
+      required: [id, tripId, title, amount, currency, category, paidBy, splitType, createdAt]
+      properties:
+        id:
+          type: integer
+        tripId:
+          type: integer
+        title:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        category:
+          type: string
+          enum: [accommodation, food, transport, activities, shopping, other]
+        paidBy:
+          type: string
+        splitType:
+          type: string
+          enum: [equal, custom]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ExpenseInput:
+      type: object
+      required: [title, amount, currency, category, paidBy, splitType]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+        currency:
+          type: string
+        category:
+          type: string
+          enum: [accommodation, food, transport, activities, shopping, other]
+        paidBy:
+          type: string
+        splitType:
+          type: string
+          enum: [equal, custom]
+        notes:
+          type: string
+
+    ExpenseUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+        currency:
+          type: string
+        category:
+          type: string
+          enum: [accommodation, food, transport, activities, shopping, other]
+        paidBy:
+          type: string
+        splitType:
+          type: string
+          enum: [equal, custom]
+        notes:
+          type: string
+
+    # ── TASK ──────────────────────────────────────────────────────────────────
+    Task:
+      type: object
+      required: [id, tripId, title, status, priority, createdAt]
+      properties:
+        id:
+          type: integer
+        tripId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, in_progress, done]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        assignedTo:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TaskInput:
+      type: object
+      required: [title, status, priority]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, done]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        assignedTo:
+          type: string
+        dueDate:
+          type: string
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, done]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        assignedTo:
+          type: string
+        dueDate:
+          type: string
