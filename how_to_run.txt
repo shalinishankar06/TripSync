@@ -1,0 +1,2 @@
+pnpm --filter @workspace/api-server run dev ---for backend
+pnpm --filter @workspace/tripsync run dev ---for frontend

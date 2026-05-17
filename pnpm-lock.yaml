@@ -31,7 +31,7 @@ catalogs:
       specifier: ^19.2.0
       version: 19.2.3
     '@vitejs/plugin-react':
-      specifier: ^5.0.4
+      specifier: ^5.2.0
       version: 5.2.0
     class-variance-authority:
       specifier: ^0.7.1
@@ -170,6 +170,9 @@ importers:
       '@tailwindcss/oxide-win32-x64-msvc':
         specifier: ^4.3.0
         version: 4.3.0
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 5.2.0(vite@7.3.3(@types/node@25.7.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.9.0))
       lightningcss-win32-x64-msvc:
         specifier: ^1.32.0
         version: 1.32.0
