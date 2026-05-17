@@ -51,6 +51,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const CURRENCIES = [
   "USD",
+  "VND",
   "EUR",
   "GBP",
   "JPY",
@@ -60,6 +61,7 @@ const CURRENCIES = [
   "INR",
   "THB",
   "IDR",
+
 ];
 
 export default function NewTrip() {

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, numeric, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, numeric, integer } from "drizzle-orm/pg-core"; //These are database column builders.Used to define PostgreSQL tables.
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
